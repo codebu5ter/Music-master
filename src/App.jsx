@@ -1,8 +1,41 @@
 import React, { Component } from 'react';
 import './App.css';
 import{ FormGroup, FormControl, InputGroup, Glyphicon } from 'react-bootstrap';
+import Profile from './Profile';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      query:'',
+      artist:''
+    }
+  }
+
+  search() {
+    console.log(this.state);
+    const BASE_URL = 'https://api.spotify.com/v1/search?';
+    const FETCH_URL = BASE_URL + 'q=' + this.state.query + '&type=artist&limit=1';
+    var accessToken = 'BQA_cKCAdw-a_f2E15dDGK5UKuelEomTehfov6K7kq6ftyXMV36Zv4jGgvWZuC-AdnKmlAa-JXzNJkmMJEk1DQ';
+
+
+    var myOptions = {
+      method: 'GET',
+      headers:  {
+        'Authorization': 'Bearer ' + accessToken
+     },
+      mode: 'cors',
+      cache: 'default'
+    };
+
+    fetch(FETCH_URL, myOptions )
+      .then(response => response.json())
+      .then(json => {
+        const artist = json.artists.items[0];
+        this.setState({artist});
+      })
+  }
+
   render() {
     return(
       <div className="App">
@@ -12,16 +45,22 @@ class App extends Component {
             <FormControl
               type="text"
               placeholder="Search for an Artist"
+              value={this.state.query}
+              onChange={event => {this.setState({query: event.target.value})}}
+              onKeyPress={event => {
+                if (event.Key === "Enter") {
+                  this.search();
+                }
+              }}
             />
-            <InputGroup.Addon>
+          <InputGroup.Addon onClick={() => this.search()}>
               <Glyphicon glyph="search"></Glyphicon>
             </InputGroup.Addon>
           </InputGroup>
         </FormGroup>
-        <div className="Profile">
-          <div>Artist Picture</div>
-          <div>Artist Name</div>
-        </div>
+        <Profile
+          artist={this.state.artist}
+        />
         <div className="Gallery">
           Gallery
         </div>
